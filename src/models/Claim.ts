@@ -30,7 +30,7 @@ export default (sequelize: Sequelize): typeof Claim => {
         allowNull: false,
       },
       status: {
-        type: DataTypes.ENUM('pending', 'accepted', 'rejected', 'disputed'),
+        type: DataTypes.ENUM('pending', 'accepted', 'rejected', 'resolved', 'disputed'),
         defaultValue: 'pending',
       },
       proof_description: {

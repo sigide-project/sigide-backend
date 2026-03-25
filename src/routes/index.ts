@@ -5,6 +5,9 @@ import usersRoutes from './users';
 import uploadsRoutes from './uploads';
 import addressesRoutes from './addresses';
 import savedItemsRoutes from './savedItems';
+import claimsRoutes from './claims';
+import messagesRoutes from './messages';
+import notificationsRoutes from './notifications';
 
 const router = Router();
 
@@ -18,5 +21,8 @@ router.use('/users', usersRoutes);
 router.use('/uploads', uploadsRoutes);
 router.use('/addresses', addressesRoutes);
 router.use('/saved-items', savedItemsRoutes);
+router.use('/claims', claimsRoutes);
+router.use('/messages', messagesRoutes);
+router.use('/notifications', notificationsRoutes);
 
 export default router;

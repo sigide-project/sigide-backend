@@ -91,7 +91,7 @@ export interface ItemAttributes {
 export type ItemCreationAttributes = Optional<ItemAttributes, 'id' | 'status' | 'description' | 'category' | 'image_urls' | 'location_name' | 'location' | 'reward_amount' | 'lost_found_at'>;
 
 // Claim types
-export type ClaimStatus = 'pending' | 'accepted' | 'rejected' | 'disputed';
+export type ClaimStatus = 'pending' | 'accepted' | 'rejected' | 'resolved' | 'disputed';
 
 export interface ClaimAttributes {
   id: string;
