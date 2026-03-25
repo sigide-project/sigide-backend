@@ -1,6 +1,7 @@
 import { Op } from 'sequelize';
 import { Message, Claim, Item, User } from '../models';
 import notificationService from './notifications';
+import { getIO } from '../socket';
 
 class MessageService {
   async getMessages(claimId: string, userId: string): Promise<{
@@ -130,6 +131,30 @@ class MessageService {
     const fullMessage = await Message.findByPk(message.id, {
       include: [{ model: User, as: 'sender', attributes: ['id', 'name', 'avatar_url'] }],
     });
+
+    try {
+      const io = getIO();
+      const senderData = fullMessage?.get('sender') as User | undefined;
+      const messagePayload = {
+        id: fullMessage!.id,
+        claim_id: fullMessage!.claim_id,
+        sender_id: fullMessage!.sender_id,
+        content: fullMessage!.content,
+        read_at: fullMessage!.read_at,
+        created_at: fullMessage!.createdAt,
+        sender: senderData
+          ? {
+              id: senderData.id,
+              name: senderData.name,
+              avatar_url: senderData.avatar_url,
+            }
+          : null,
+      };
+      console.log(`[socket] Emitting new_message to claim:${claimId}`, messagePayload.id);
+      io.to(`claim:${claimId}`).emit('new_message', messagePayload);
+    } catch (error) {
+      console.warn('[socket] Socket.io not initialized, skipping message emit', error);
+    }
 
     return { message: fullMessage! };
   }

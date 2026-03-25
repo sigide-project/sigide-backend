@@ -1,4 +1,5 @@
 import { Notification } from '../models';
+import { getIO } from '../socket';
 
 interface CreateNotificationInput {
   user_id: string;
@@ -8,7 +9,24 @@ interface CreateNotificationInput {
 
 class NotificationService {
   async createNotification(data: CreateNotificationInput): Promise<Notification> {
-    return Notification.create(data);
+    const notification = await Notification.create(data);
+
+    try {
+      const io = getIO();
+      const notificationPayload = {
+        id: notification.id,
+        type: notification.type,
+        payload: notification.payload,
+        read: notification.read,
+        created_at: notification.createdAt,
+      };
+      console.log(`[socket] Emitting new_notification to user:${data.user_id}`, notificationPayload.id);
+      io.to(`user:${data.user_id}`).emit('new_notification', notificationPayload);
+    } catch (error) {
+      console.warn('[socket] Socket.io not initialized, skipping notification emit', error);
+    }
+
+    return notification;
   }
 
   async getNotifications(userId: string): Promise<{ notifications: Notification[]; unread_count: number }> {

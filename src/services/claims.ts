@@ -1,6 +1,7 @@
 import { Op } from 'sequelize';
 import { Item, User, Claim, Message, Notification } from '../models';
 import notificationService from './notifications';
+import { getIO } from '../socket';
 
 interface CreateClaimInput {
   item_id: string;
@@ -222,6 +223,20 @@ class ClaimService {
       ],
     });
 
+    try {
+      const io = getIO();
+      const claimUpdatePayload = {
+        claim_id: claimId,
+        status: 'accepted',
+        item_id: item.id,
+      };
+      io.to(`claim:${claimId}`).emit('claim_updated', claimUpdatePayload);
+      io.to(`user:${item.user_id}`).emit('claim_updated', claimUpdatePayload);
+      io.to(`user:${claim.claimant_id}`).emit('claim_updated', claimUpdatePayload);
+    } catch {
+      console.warn('[socket] Socket.io not initialized, skipping claim_updated emit');
+    }
+
     return { claim: updatedClaim! };
   }
 
@@ -273,6 +288,20 @@ class ClaimService {
         },
       ],
     });
+
+    try {
+      const io = getIO();
+      const claimUpdatePayload = {
+        claim_id: claimId,
+        status: 'rejected',
+        item_id: item.id,
+      };
+      io.to(`claim:${claimId}`).emit('claim_updated', claimUpdatePayload);
+      io.to(`user:${item.user_id}`).emit('claim_updated', claimUpdatePayload);
+      io.to(`user:${claim.claimant_id}`).emit('claim_updated', claimUpdatePayload);
+    } catch {
+      console.warn('[socket] Socket.io not initialized, skipping claim_updated emit');
+    }
 
     return { claim: updatedClaim! };
   }
@@ -330,6 +359,20 @@ class ClaimService {
         },
       ],
     });
+
+    try {
+      const io = getIO();
+      const claimUpdatePayload = {
+        claim_id: claimId,
+        status: 'resolved',
+        item_id: item.id,
+      };
+      io.to(`claim:${claimId}`).emit('claim_updated', claimUpdatePayload);
+      io.to(`user:${item.user_id}`).emit('claim_updated', claimUpdatePayload);
+      io.to(`user:${claim.claimant_id}`).emit('claim_updated', claimUpdatePayload);
+    } catch {
+      console.warn('[socket] Socket.io not initialized, skipping claim_updated emit');
+    }
 
     return { claim: updatedClaim! };
   }
