@@ -8,6 +8,7 @@ import initReward, { Reward } from './Reward';
 import initNotification, { Notification } from './Notification';
 import initAddress, { Address } from './Address';
 import initSavedItem, { SavedItem } from './SavedItem';
+import initChatDeletion, { ChatDeletion } from './ChatDeletion';
 import { DatabaseConfig } from '../types';
 
 const env = process.env.NODE_ENV || 'development';
@@ -30,6 +31,7 @@ initReward(sequelize);
 initNotification(sequelize);
 initAddress(sequelize);
 initSavedItem(sequelize);
+initChatDeletion(sequelize);
 
 // Associations
 User.hasMany(Item, { foreignKey: 'user_id', as: 'items' });
@@ -63,6 +65,13 @@ SavedItem.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 Item.hasMany(SavedItem, { foreignKey: 'item_id', as: 'savedBy' });
 SavedItem.belongsTo(Item, { foreignKey: 'item_id', as: 'item' });
 
+// ChatDeletion associations
+Claim.hasMany(ChatDeletion, { foreignKey: 'claim_id', as: 'deletions' });
+ChatDeletion.belongsTo(Claim, { foreignKey: 'claim_id', as: 'claim' });
+
+User.hasMany(ChatDeletion, { foreignKey: 'user_id', as: 'chatDeletions' });
+ChatDeletion.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
 export {
   sequelize,
   Sequelize,
@@ -74,4 +83,5 @@ export {
   Notification,
   Address,
   SavedItem,
+  ChatDeletion,
 };

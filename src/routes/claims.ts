@@ -7,9 +7,11 @@ const router = Router();
 router.post('/', authenticate, claimController.create.bind(claimController));
 router.get('/mine', authenticate, claimController.getMyClaims.bind(claimController));
 router.get('/on-my-items', authenticate, claimController.getClaimsOnMyItems.bind(claimController));
+router.get('/my-chats', authenticate, claimController.getMyChats.bind(claimController));
 router.get('/:id', authenticate, claimController.getById.bind(claimController));
 router.patch('/:id/accept', authenticate, claimController.accept.bind(claimController));
 router.patch('/:id/reject', authenticate, claimController.reject.bind(claimController));
 router.patch('/:id/resolve', authenticate, claimController.resolve.bind(claimController));
+router.delete('/:id/chat', authenticate, claimController.deleteChat.bind(claimController));
 
 export default router;

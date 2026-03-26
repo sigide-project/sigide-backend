@@ -1,5 +1,5 @@
 import { Op } from 'sequelize';
-import { Message, Claim, Item, User } from '../models';
+import { Message, Claim, Item, User, ChatDeletion } from '../models';
 import notificationService from './notifications';
 import { getIO } from '../socket';
 
@@ -35,6 +35,15 @@ class MessageService {
       return { error: 'You are not authorized to view these messages', status: 403 };
     }
 
+    const chatDeletion = await ChatDeletion.findOne({
+      where: { claim_id: claimId, user_id: userId },
+    });
+
+    const messageWhereClause: Record<string, unknown> = { claim_id: claimId };
+    if (chatDeletion) {
+      messageWhereClause.createdAt = { [Op.gt]: chatDeletion.deleted_at };
+    }
+
     await Message.update(
       { read_at: new Date() },
       {
@@ -42,12 +51,13 @@ class MessageService {
           claim_id: claimId,
           sender_id: { [Op.ne]: userId },
           read_at: { [Op.eq]: null },
+          ...(chatDeletion ? { createdAt: { [Op.gt]: chatDeletion.deleted_at } } : {}),
         },
       }
     );
 
     const messages = await Message.findAll({
-      where: { claim_id: claimId },
+      where: messageWhereClause,
       include: [{ model: User, as: 'sender', attributes: ['id', 'name', 'avatar_url'] }],
       order: [['createdAt', 'ASC']],
     });
@@ -132,6 +142,13 @@ class MessageService {
       include: [{ model: User, as: 'sender', attributes: ['id', 'name', 'avatar_url'] }],
     });
 
+    await ChatDeletion.destroy({
+      where: { claim_id: claimId },
+    });
+
+    const ownerId = item.user_id;
+    const claimantId = claim.claimant_id;
+
     try {
       const io = getIO();
       const senderData = fullMessage?.get('sender') as User | undefined;
@@ -152,6 +169,18 @@ class MessageService {
       };
       console.log(`[socket] Emitting new_message to claim:${claimId}`, messagePayload.id);
       io.to(`claim:${claimId}`).emit('new_message', messagePayload);
+
+      const chatListUpdatePayload = {
+        claim_id: claimId,
+        last_message: {
+          id: fullMessage!.id,
+          content: fullMessage!.content,
+          sender_id: fullMessage!.sender_id,
+          created_at: fullMessage!.createdAt,
+        },
+      };
+      io.to(`user:${ownerId}`).emit('chat_list_updated', chatListUpdatePayload);
+      io.to(`user:${claimantId}`).emit('chat_list_updated', chatListUpdatePayload);
     } catch (error) {
       console.warn('[socket] Socket.io not initialized, skipping message emit', error);
     }

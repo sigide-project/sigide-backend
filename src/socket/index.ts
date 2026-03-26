@@ -20,6 +20,16 @@ interface ServerToClientEvents {
   new_message: (data: Record<string, unknown>) => void;
   new_notification: (data: Record<string, unknown>) => void;
   claim_updated: (data: Record<string, unknown>) => void;
+  chat_deleted: (data: { claim_id: string }) => void;
+  chat_list_updated: (data: {
+    claim_id: string;
+    last_message: {
+      id: string;
+      content: string;
+      sender_id: string;
+      created_at: Date;
+    };
+  }) => void;
 }
 
 interface ClientToServerEvents {

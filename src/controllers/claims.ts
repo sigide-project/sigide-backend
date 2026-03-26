@@ -145,6 +145,37 @@ class ClaimController {
       res.status(500).json({ success: false, message: 'Failed to resolve claim' });
     }
   }
+
+  async getMyChats(req: Request, res: Response): Promise<void> {
+    try {
+      const user = req.user as AuthenticatedUser;
+      const chats = await claimService.getMyChats(user.id);
+      res.json({ success: true, chats });
+    } catch (error) {
+      const err = error as Error;
+      console.error('Error fetching my chats:', err);
+      res.status(500).json({ success: false, message: 'Failed to fetch chats' });
+    }
+  }
+
+  async deleteChat(req: Request, res: Response): Promise<void> {
+    try {
+      const user = req.user as AuthenticatedUser;
+      const id = req.params.id as string;
+      const result = await claimService.deleteChat(id, user.id);
+
+      if (result.error) {
+        res.status(result.status!).json({ success: false, message: result.error });
+        return;
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      const err = error as Error;
+      console.error('Error deleting chat:', err);
+      res.status(500).json({ success: false, message: 'Failed to delete chat' });
+    }
+  }
 }
 
 export default new ClaimController();
