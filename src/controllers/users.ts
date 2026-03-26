@@ -26,6 +26,7 @@ class UsersController {
           avatar_url: user.avatar_url,
           role: user.role,
           rating: user.rating,
+          address: user.address,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         },
@@ -94,12 +95,13 @@ class UsersController {
     try {
       const userId = req.user!.id;
 
-      const { name, phone, avatar_url, username } = req.body;
+      const { name, phone, avatar_url, username, address } = req.body;
       const updateData: UpdateMeInput = {};
 
       if (name !== undefined) updateData.name = name;
       if (phone !== undefined) updateData.phone = phone;
       if (avatar_url !== undefined) updateData.avatar_url = avatar_url;
+      if (address !== undefined) updateData.address = address;
       
       if (username !== undefined) {
         const isAvailable = await usersService.isUsernameAvailable(username, userId);

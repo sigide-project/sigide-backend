@@ -56,6 +56,7 @@ User.hasMany(Notification, { foreignKey: 'user_id', as: 'notifications' });
 Notification.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
 User.hasMany(Address, { foreignKey: 'user_id', as: 'addresses' });
+User.hasOne(Address, { foreignKey: 'user_id', as: 'address' });
 Address.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
 // SavedItem associations

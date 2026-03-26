@@ -1,5 +1,5 @@
 import { Op } from 'sequelize';
-import { Message, Claim, Item, User, ChatDeletion } from '../models';
+import { Message, Claim, Item, User, ChatDeletion, Address } from '../models';
 import notificationService from './notifications';
 import { getIO } from '../socket';
 
@@ -7,18 +7,28 @@ class MessageService {
   async getMessages(claimId: string, userId: string): Promise<{
     messages?: Message[];
     claim?: Record<string, unknown>;
-    contact?: { whatsapp_url: string };
+    contact?: { phone: string | null; address: string | null } | null;
     error?: string;
     status?: number;
   }> {
     const claim = await Claim.findByPk(claimId, {
       include: [
-        { model: User, as: 'claimant', attributes: ['id', 'name', 'avatar_url'] },
+        {
+          model: User,
+          as: 'claimant',
+          attributes: ['id', 'name', 'avatar_url', 'phone', 'rating'],
+          include: [{ model: Address, as: 'address' }],
+        },
         {
           model: Item,
           as: 'item',
           attributes: ['id', 'title', 'type', 'status', 'location_name', 'image_urls', 'user_id'],
-          include: [{ model: User, as: 'owner', attributes: ['id', 'name', 'avatar_url', 'phone'] }],
+          include: [{
+            model: User,
+            as: 'owner',
+            attributes: ['id', 'name', 'avatar_url', 'phone', 'rating'],
+            include: [{ model: Address, as: 'address' }],
+          }],
         },
       ],
     });
@@ -62,7 +72,8 @@ class MessageService {
       order: [['createdAt', 'ASC']],
     });
 
-    const owner = (item as Item & { owner?: User }).owner;
+    const owner = (item as Item & { owner?: User & { address?: Address } }).owner;
+    const claimant = claim.get('claimant') as User & { address?: Address };
     const claimData = {
       id: claim.id,
       status: claim.status,
@@ -74,16 +85,33 @@ class MessageService {
         location_name: item.location_name,
         image_urls: item.image_urls,
       },
-      claimant: claim.get('claimant'),
-      owner: owner ? { id: owner.id, name: owner.name, avatar_url: owner.avatar_url } : null,
+      claimant: claimant ? {
+        id: claimant.id,
+        name: claimant.name,
+        avatar_url: claimant.avatar_url,
+        rating: claimant.rating,
+      } : null,
+      owner: owner ? {
+        id: owner.id,
+        name: owner.name,
+        avatar_url: owner.avatar_url,
+        rating: owner.rating,
+      } : null,
     };
 
-    let contact: { whatsapp_url: string } | undefined;
-    if (claim.status === 'accepted' && owner?.phone) {
-      const message = `Hi, I found your item "${item.title}" on Sigide`;
-      contact = {
-        whatsapp_url: `https://wa.me/91${owner.phone}?text=${encodeURIComponent(message)}`,
-      };
+    let contact: { phone: string | null; address: string | null } | null = null;
+    if (claim.status === 'accepted') {
+      if (isOwner) {
+        contact = {
+          phone: claimant?.phone ?? null,
+          address: claimant?.address?.address_line1 ?? null,
+        };
+      } else {
+        contact = {
+          phone: owner?.phone ?? null,
+          address: owner?.address?.address_line1 ?? null,
+        };
+      }
     }
 
     return { messages, claim: claimData, contact };

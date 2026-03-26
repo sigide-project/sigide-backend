@@ -1,4 +1,4 @@
-import { User, Item } from '../models';
+import { User, Item, Address } from '../models';
 import { hashPassword, comparePassword } from './auth';
 
 export interface UpdateMeInput {
@@ -6,6 +6,7 @@ export interface UpdateMeInput {
   phone?: string;
   avatar_url?: string;
   username?: string;
+  address?: string;
 }
 
 export interface ChangePasswordInput {
@@ -24,6 +25,7 @@ export interface SafeUserResponse {
   role: 'user' | 'admin';
   createdAt: Date;
   updatedAt: Date;
+  address?: string | null;
 }
 
 export interface PublicUserProfile {
@@ -38,7 +40,9 @@ export interface PublicUserProfile {
 
 class UsersService {
   async getById(userId: string): Promise<SafeUserResponse | null> {
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId, {
+      include: [{ model: Address, as: 'address' }],
+    });
     if (!user) {
       return null;
     }
@@ -77,13 +81,15 @@ class UsersService {
   }
 
   async updateMe(userId: string, data: UpdateMeInput): Promise<SafeUserResponse | null> {
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId, {
+      include: [{ model: Address, as: 'address' }],
+    });
 
     if (!user) {
       return null;
     }
 
-    const updateData: Partial<UpdateMeInput> = {};
+    const updateData: Partial<Omit<UpdateMeInput, 'address'>> = {};
 
     if (data.name !== undefined) {
       updateData.name = data.name;
@@ -100,6 +106,25 @@ class UsersService {
 
     if (Object.keys(updateData).length > 0) {
       await user.update(updateData);
+    }
+
+    if (data.address !== undefined) {
+      const existingAddress = await Address.findOne({ where: { user_id: userId } });
+      if (existingAddress) {
+        await existingAddress.update({ address_line1: data.address });
+      } else {
+        await Address.create({
+          user_id: userId,
+          label: 'Pickup',
+          address_line1: data.address,
+          city: '',
+          state: '',
+          postal_code: '',
+          country: 'India',
+          is_default: true,
+        });
+      }
+      await user.reload({ include: [{ model: Address, as: 'address' }] });
     }
 
     return this.toSafeUser(user);
@@ -172,6 +197,7 @@ class UsersService {
   }
 
   toSafeUser(user: User): SafeUserResponse {
+    const userAddress = (user as User & { address?: Address }).address;
     return {
       id: user.id,
       username: user.username,
@@ -183,6 +209,7 @@ class UsersService {
       role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+      address: userAddress?.address_line1 ?? null,
     };
   }
 }
