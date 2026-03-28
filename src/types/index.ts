@@ -56,7 +56,7 @@ export interface UserAttributes {
   password_hash: string;
   avatar_url?: string | null;
   rating: number;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'banned';
   isActive?: boolean;
   isDeleted?: boolean;
   createdAt?: Date;
@@ -187,7 +187,7 @@ export interface AuthenticatedUser {
   phone?: string | null;
   avatar_url?: string | null;
   rating: number;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'banned';
   isActive?: boolean;
   isDeleted?: boolean;
 }
@@ -265,7 +265,7 @@ export interface UploadResult {
 export interface JwtPayload {
   id: string;
   email: string;
-  role?: 'user' | 'admin';
+  role?: 'user' | 'admin' | 'banned';
   iat?: number;
   exp?: number;
 }
@@ -291,7 +291,7 @@ export interface AuthResponse {
     name: string;
     email: string;
     avatar_url: string | null;
-    role: 'user' | 'admin';
+    role: 'user' | 'admin' | 'banned';
   };
   token: string;
 }

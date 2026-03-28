@@ -20,7 +20,7 @@ export interface UserPublicData {
   name: string;
   email: string;
   avatar_url: string | null;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'banned';
 }
 
 export interface AuthResponse {

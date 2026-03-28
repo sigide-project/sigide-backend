@@ -22,7 +22,7 @@ export interface SafeUserResponse {
   phone: string | null;
   avatar_url: string | null;
   rating: number;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'banned';
   createdAt: Date;
   updatedAt: Date;
   address?: string | null;

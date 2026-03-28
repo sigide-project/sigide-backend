@@ -10,7 +10,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   declare password_hash: string;
   declare avatar_url: string | null;
   declare rating: number;
-  declare role: 'user' | 'admin';
+  declare role: 'user' | 'admin' | 'banned';
   declare isActive: boolean;
   declare isDeleted: boolean;
   declare readonly createdAt: Date;
@@ -58,7 +58,7 @@ export default (sequelize: Sequelize): typeof User => {
         defaultValue: 0,
       },
       role: {
-        type: DataTypes.ENUM('user', 'admin'),
+        type: DataTypes.ENUM('user', 'admin', 'banned'),
         defaultValue: 'user',
       },
       isActive: {
