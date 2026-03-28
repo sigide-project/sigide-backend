@@ -41,7 +41,7 @@ export async function register(
     const { name, email, password, phone } = validationResult.data;
 
     const existingUser = await findUserByEmail(email);
-    if (existingUser) {
+    if (existingUser && !existingUser.isDeleted) {
       return res.status(409).json({
         success: false,
         message: 'A user with this email already exists',
@@ -93,6 +93,13 @@ export async function login(req: Request, res: Response): Promise<Response> {
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password',
+      });
+    }
+
+    if (user.isDeleted) {
+      return res.status(401).json({
+        success: false,
+        message: 'This account has been deleted. Please create a new account.',
       });
     }
 

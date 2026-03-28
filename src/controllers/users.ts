@@ -221,6 +221,34 @@ class UsersController {
       });
     }
   }
+
+  async deleteAccount(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user!.id;
+      const result = await usersService.deleteAccount(userId);
+
+      if (!result.success) {
+        res.status(400).json({
+          success: false,
+          message: result.message,
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        message: result.message,
+      });
+    } catch (error) {
+      const err = error as Error;
+      console.error('Error deleting account:', err);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete account',
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined,
+      });
+    }
+  }
 }
 
 export default new UsersController();

@@ -433,3 +433,107 @@ export const addressValidation: AddressValidation = {
     handleValidationErrors,
   ],
 };
+
+const VALID_ISSUE_TYPES = [
+  'Bug or Technical Issue',
+  'Suspicious User/Listing',
+  'Inappropriate Content',
+  'Scam or Fraud',
+  'Account Issue',
+  'Other',
+];
+
+interface ContactValidation {
+  create: ValidationMiddleware;
+}
+
+export const contactValidation: ContactValidation = {
+  create: [
+    body('name')
+      .trim()
+      .notEmpty()
+      .withMessage('Name is required')
+      .isLength({ min: 2, max: 100 })
+      .withMessage('Name must be between 2 and 100 characters'),
+    body('email')
+      .trim()
+      .notEmpty()
+      .withMessage('Email is required')
+      .isEmail()
+      .withMessage('Must be a valid email address'),
+    body('subject')
+      .trim()
+      .notEmpty()
+      .withMessage('Subject is required')
+      .isLength({ min: 2, max: 255 })
+      .withMessage('Subject must be between 2 and 255 characters'),
+    body('message')
+      .trim()
+      .notEmpty()
+      .withMessage('Message is required')
+      .isLength({ min: 10, max: 5000 })
+      .withMessage('Message must be between 10 and 5000 characters'),
+    handleValidationErrors,
+  ],
+};
+
+interface ReportsValidation {
+  create: ValidationMiddleware;
+}
+
+export const reportsValidation: ReportsValidation = {
+  create: [
+    body('issue_type')
+      .trim()
+      .notEmpty()
+      .withMessage('Issue type is required')
+      .isIn(VALID_ISSUE_TYPES)
+      .withMessage(`Issue type must be one of: ${VALID_ISSUE_TYPES.join(', ')}`),
+    body('email')
+      .trim()
+      .notEmpty()
+      .withMessage('Email is required')
+      .isEmail()
+      .withMessage('Must be a valid email address'),
+    body('listing_url')
+      .optional({ values: 'falsy' })
+      .isURL()
+      .withMessage('Listing URL must be a valid URL'),
+    body('description')
+      .trim()
+      .notEmpty()
+      .withMessage('Description is required')
+      .isLength({ min: 10, max: 5000 })
+      .withMessage('Description must be between 10 and 5000 characters'),
+    handleValidationErrors,
+  ],
+};
+
+interface FeedbackValidation {
+  create: ValidationMiddleware;
+}
+
+export const feedbackValidation: FeedbackValidation = {
+  create: [
+    body('rating')
+      .optional({ values: 'null' })
+      .isInt({ min: 1, max: 5 })
+      .withMessage('Rating must be an integer between 1 and 5'),
+    body('name')
+      .optional({ values: 'falsy' })
+      .trim()
+      .isLength({ max: 100 })
+      .withMessage('Name must be at most 100 characters'),
+    body('email')
+      .optional({ values: 'falsy' })
+      .isEmail()
+      .withMessage('Must be a valid email address'),
+    body('feedback')
+      .trim()
+      .notEmpty()
+      .withMessage('Feedback is required')
+      .isLength({ min: 5, max: 5000 })
+      .withMessage('Feedback must be between 5 and 5000 characters'),
+    handleValidationErrors,
+  ],
+};

@@ -9,6 +9,9 @@ import initNotification, { Notification } from './Notification';
 import initAddress, { Address } from './Address';
 import initSavedItem, { SavedItem } from './SavedItem';
 import initChatDeletion, { ChatDeletion } from './ChatDeletion';
+import initContactMessage, { ContactMessage } from './ContactMessage';
+import initReport, { Report } from './Report';
+import initFeedback, { Feedback } from './Feedback';
 import { DatabaseConfig } from '../types';
 
 const env = process.env.NODE_ENV || 'development';
@@ -32,6 +35,9 @@ initNotification(sequelize);
 initAddress(sequelize);
 initSavedItem(sequelize);
 initChatDeletion(sequelize);
+initContactMessage(sequelize);
+initReport(sequelize);
+initFeedback(sequelize);
 
 // Associations
 User.hasMany(Item, { foreignKey: 'user_id', as: 'items' });
@@ -73,6 +79,18 @@ ChatDeletion.belongsTo(Claim, { foreignKey: 'claim_id', as: 'claim' });
 User.hasMany(ChatDeletion, { foreignKey: 'user_id', as: 'chatDeletions' });
 ChatDeletion.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
+// ContactMessage associations
+User.hasMany(ContactMessage, { foreignKey: 'user_id', as: 'contactMessages' });
+ContactMessage.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// Report associations
+User.hasMany(Report, { foreignKey: 'user_id', as: 'reports' });
+Report.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// Feedback associations
+User.hasMany(Feedback, { foreignKey: 'user_id', as: 'feedbackList' });
+Feedback.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
 export {
   sequelize,
   Sequelize,
@@ -85,4 +103,7 @@ export {
   Address,
   SavedItem,
   ChatDeletion,
+  ContactMessage,
+  Report,
+  Feedback,
 };

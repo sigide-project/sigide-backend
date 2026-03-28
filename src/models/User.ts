@@ -12,6 +12,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   declare rating: number;
   declare role: 'user' | 'admin';
   declare isActive: boolean;
+  declare isDeleted: boolean;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 }
@@ -63,6 +64,10 @@ export default (sequelize: Sequelize): typeof User => {
       isActive: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
+      },
+      isDeleted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
       },
     },
     {

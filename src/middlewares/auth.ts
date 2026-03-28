@@ -32,6 +32,7 @@ function toAuthenticatedUser(user: User): AuthenticatedUser {
     rating: user.rating,
     role: user.role,
     isActive: user.isActive,
+    isDeleted: user.isDeleted,
   };
 }
 
@@ -58,6 +59,13 @@ export async function authenticate(
       return res.status(401).json({
         success: false,
         message: 'Invalid token. User not found.',
+      });
+    }
+
+    if (user.isDeleted) {
+      return res.status(401).json({
+        success: false,
+        message: 'This account has been deleted.',
       });
     }
 

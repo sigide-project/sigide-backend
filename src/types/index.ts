@@ -58,11 +58,12 @@ export interface UserAttributes {
   rating: number;
   role: 'user' | 'admin';
   isActive?: boolean;
+  isDeleted?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-export type UserCreationAttributes = Optional<UserAttributes, 'id' | 'username' | 'phone' | 'avatar_url' | 'rating' | 'role' | 'isActive'>;
+export type UserCreationAttributes = Optional<UserAttributes, 'id' | 'username' | 'phone' | 'avatar_url' | 'rating' | 'role' | 'isActive' | 'isDeleted'>;
 
 // Item types
 export type ItemType = 'lost' | 'found';
@@ -188,6 +189,7 @@ export interface AuthenticatedUser {
   rating: number;
   role: 'user' | 'admin';
   isActive?: boolean;
+  isDeleted?: boolean;
 }
 
 // Sort options for items

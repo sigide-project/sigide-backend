@@ -106,8 +106,7 @@ export async function findOrCreateGoogleUser(
   const avatarUrl = profile.photos?.[0]?.value || null;
 
   const existingUser = await findUserByEmail(email);
-  if (existingUser) {
-    // Update avatar if user doesn't have one and Google provides one
+  if (existingUser && !existingUser.isDeleted) {
     if (!existingUser.avatar_url && avatarUrl) {
       await existingUser.update({ avatar_url: avatarUrl });
     }

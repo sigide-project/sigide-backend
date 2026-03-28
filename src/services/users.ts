@@ -1,4 +1,4 @@
-import { User, Item, Address } from '../models';
+import { User, Item, Address, SavedItem, Claim, Message, Notification, Reward } from '../models';
 import { hashPassword, comparePassword } from './auth';
 
 export interface UpdateMeInput {
@@ -211,6 +211,43 @@ class UsersService {
       updatedAt: user.updatedAt,
       address: userAddress?.address_line1 ?? null,
     };
+  }
+
+  async deleteAccount(userId: string): Promise<{ success: boolean; message: string }> {
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return { success: false, message: 'User not found' };
+    }
+
+    if (user.isDeleted) {
+      return { success: false, message: 'Account is already deleted' };
+    }
+
+    const userItems = await Item.findAll({ where: { user_id: userId } });
+    const itemIds = userItems.map((item) => item.id);
+
+    if (itemIds.length > 0) {
+      await Reward.destroy({ where: { item_id: itemIds } });
+      const claims = await Claim.findAll({ where: { item_id: itemIds } });
+      const claimIds = claims.map((c) => c.id);
+      if (claimIds.length > 0) {
+        await Message.destroy({ where: { claim_id: claimIds } });
+      }
+      await Claim.destroy({ where: { item_id: itemIds } });
+      await SavedItem.destroy({ where: { item_id: itemIds } });
+      await Item.destroy({ where: { user_id: userId } });
+    }
+
+    await SavedItem.destroy({ where: { user_id: userId } });
+    await Notification.destroy({ where: { user_id: userId } });
+    await Address.destroy({ where: { user_id: userId } });
+
+    await user.update({
+      isDeleted: true,
+      isActive: false,
+    });
+
+    return { success: true, message: 'Account deleted successfully' };
   }
 }
 

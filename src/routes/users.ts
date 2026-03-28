@@ -48,4 +48,10 @@ router.get(
   usersController.getPublicProfile.bind(usersController)
 );
 
+router.delete(
+  '/me',
+  authenticate,
+  usersController.deleteAccount.bind(usersController)
+);
+
 export default router;

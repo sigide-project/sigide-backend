@@ -8,6 +8,9 @@ import savedItemsRoutes from './savedItems';
 import claimsRoutes from './claims';
 import messagesRoutes from './messages';
 import notificationsRoutes from './notifications';
+import contactRoutes from './contact';
+import reportsRoutes from './reports';
+import feedbackRoutes from './feedback';
 
 const router = Router();
 
@@ -24,5 +27,8 @@ router.use('/saved-items', savedItemsRoutes);
 router.use('/claims', claimsRoutes);
 router.use('/messages', messagesRoutes);
 router.use('/notifications', notificationsRoutes);
+router.use('/contact', contactRoutes);
+router.use('/reports', reportsRoutes);
+router.use('/feedback', feedbackRoutes);
 
 export default router;
