@@ -12,6 +12,7 @@ import contactRoutes from './contact';
 import reportsRoutes from './reports';
 import feedbackRoutes from './feedback';
 import adminRoutes from './admin.routes';
+import statsRoutes from './stats';
 
 const router = Router();
 
@@ -32,5 +33,6 @@ router.use('/contact', contactRoutes);
 router.use('/reports', reportsRoutes);
 router.use('/feedback', feedbackRoutes);
 router.use('/admin', adminRoutes);
+router.use('/stats', statsRoutes);
 
 export default router;
